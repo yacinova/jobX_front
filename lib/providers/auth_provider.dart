@@ -8,6 +8,7 @@ class AuthProvider with ChangeNotifier {
   String? _userId;
   String? _userRole;
   bool _isLoading = false;
+  bool _mounted = true;
 
   // Get the base URL depending on the platform
   String get baseUrl {
@@ -20,11 +21,27 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
+  bool get mounted => _mounted;
+
+  @override
+  void dispose() {
+    _mounted = false;
+    super.dispose();
+  }
+
   bool get isAuth => _token != null;
   bool get isLoading => _isLoading;
   String? get token => _token;
   String? get userId => _userId;
   String? get userRole => _userRole;
+
+  void _safeNotifyListeners() {
+    Future.microtask(() {
+      if (mounted) {
+        notifyListeners();
+      }
+    });
+  }
 
   Future<void> register(
     String email,
@@ -33,7 +50,7 @@ class AuthProvider with ChangeNotifier {
     String role,
   ) async {
     _isLoading = true;
-    notifyListeners();
+    _safeNotifyListeners();
 
     try {
       final response = await http.post(
@@ -51,21 +68,21 @@ class AuthProvider with ChangeNotifier {
       print("responseData-------------$responseData");
       if (response.statusCode == 201) {
         _isLoading = false;
-        notifyListeners();
+        _safeNotifyListeners();
         return;
       } else {
         throw responseData['message'] ?? 'Registration failed';
       }
     } catch (error) {
       _isLoading = false;
-      notifyListeners();
+      _safeNotifyListeners();
       throw error.toString();
     }
   }
 
-  Future<void> login(String email, String password) async {
+  Future<Map<String, dynamic>> login(String email, String password) async {
     _isLoading = true;
-    notifyListeners();
+    _safeNotifyListeners();
 
     try {
       final response = await http.post(
@@ -81,20 +98,27 @@ class AuthProvider with ChangeNotifier {
         _userId = responseData['id'];
         _userRole = responseData['role'];
         _isLoading = false;
-        notifyListeners();
+        _safeNotifyListeners();
+
+        // Return the response data to pass the id to dashboard
+        return {
+          'success': true,
+          'id': _userId,
+          'message': responseData['message'] ?? 'Login successful'
+        };
       } else {
         throw responseData['message'] ?? 'Login failed';
       }
     } catch (error) {
       _isLoading = false;
-      notifyListeners();
+      _safeNotifyListeners();
       throw error.toString();
     }
   }
 
   Future<void> verifyOTP(String code) async {
     _isLoading = true;
-    notifyListeners();
+    _safeNotifyListeners();
 
     try {
       final response = await http.post(
@@ -109,13 +133,13 @@ class AuthProvider with ChangeNotifier {
         _token = responseData['token'];
         _userId = responseData['id'];
         _isLoading = false;
-        notifyListeners();
+        _safeNotifyListeners();
       } else {
         throw responseData['message'] ?? 'Verification failed';
       }
     } catch (error) {
       _isLoading = false;
-      notifyListeners();
+      _safeNotifyListeners();
       throw error.toString();
     }
   }
@@ -124,6 +148,35 @@ class AuthProvider with ChangeNotifier {
     _token = null;
     _userId = null;
     _userRole = null;
-    notifyListeners();
+    _safeNotifyListeners();
+  }
+
+  Future<Map<String, dynamic>> getUserDetails(String userId) async {
+    _isLoading = true;
+    _safeNotifyListeners();
+
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/user/$userId'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $_token',
+        },
+      );
+
+      final responseData = json.decode(response.body);
+
+      if (response.statusCode == 200) {
+        _isLoading = false;
+        _safeNotifyListeners();
+        return responseData;
+      } else {
+        throw responseData['message'] ?? 'Failed to fetch user details';
+      }
+    } catch (error) {
+      _isLoading = false;
+      _safeNotifyListeners();
+      throw error.toString();
+    }
   }
 }

@@ -3,11 +3,9 @@ import 'package:provider/provider.dart';
 import 'screens/auth_screens/login_screen.dart';
 import 'screens/auth_screens/register_screen.dart';
 import 'screens/auth_screens/otp_screen.dart';
-import 'screens/user_screens/client_dashboard.dart';
-import 'screens/user_screens/worker_dashboard.dart';
-import 'screens/user_screens/create_job_screen.dart';
-import 'screens/user_screens/job_details_screen.dart';
+import 'screens/dashboard/dashboard.dart';
 import 'providers/auth_provider.dart';
+import 'providers/user_provider.dart';
 
 void main() {
   runApp(const MyApp());
@@ -21,6 +19,13 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProxyProvider<AuthProvider, UserProvider>(
+          create: (_) => UserProvider(baseUrl: '', token: null),
+          update: (context, authProvider, previous) => UserProvider(
+            baseUrl: authProvider.baseUrl,
+            token: authProvider.token,
+          ),
+        ),
       ],
       child: MaterialApp(
         title: 'Marketplace App',
@@ -53,21 +58,7 @@ class MyApp extends StatelessWidget {
           '/login': (context) => const LoginScreen(),
           '/register': (context) => const RegisterScreen(),
           '/otp': (context) => const OTPScreen(),
-          '/client-dashboard': (context) => const ClientDashboard(),
-          '/worker-dashboard': (context) => const WorkerDashboard(),
-          '/create-job': (context) => const CreateJobScreen(),
-          '/job-details': (context) {
-            final args = ModalRoute.of(context)!.settings.arguments
-                as Map<String, dynamic>;
-            return JobDetailsScreen(
-              jobId: args['jobId'],
-              title: args['title'],
-              description: args['description'],
-              category: args['category'],
-              budget: args['budget'],
-              clientName: args['clientName'],
-            );
-          },
+          '/dashboard': (context) => const DashboardScreen(),
         },
       ),
     );

@@ -27,17 +27,15 @@ class _LoginScreenState extends State<LoginScreen> {
     if (!_formKey.currentState!.validate()) return;
 
     try {
-      await Provider.of<AuthProvider>(
+      final loginResponse = await Provider.of<AuthProvider>(
         context,
         listen: false,
       ).login(_emailController.text.trim(), _passwordController.text);
 
       if (mounted) {
-        final userRole =
-            Provider.of<AuthProvider>(context, listen: false).userRole;
         Navigator.pushReplacementNamed(
           context,
-          userRole == 'client' ? '/client-dashboard' : '/worker-dashboard',
+          '/dashboard',
         );
       }
     } catch (error) {

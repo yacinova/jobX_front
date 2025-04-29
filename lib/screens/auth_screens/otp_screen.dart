@@ -29,11 +29,9 @@ class _OTPScreenState extends State<OTPScreen> {
       ).verifyOTP(_otpController.text.trim());
 
       if (mounted) {
-        final userRole =
-            Provider.of<AuthProvider>(context, listen: false).userRole;
         Navigator.pushReplacementNamed(
           context,
-          userRole == 'client' ? '/client-dashboard' : '/worker-dashboard',
+          '/dashboard',
         );
       }
     } catch (error) {
