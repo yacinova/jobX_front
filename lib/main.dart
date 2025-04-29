@@ -4,6 +4,7 @@ import 'screens/auth_screens/login_screen.dart';
 import 'screens/auth_screens/register_screen.dart';
 import 'screens/auth_screens/otp_screen.dart';
 import 'screens/dashboard/dashboard.dart';
+import 'screens/dashboard/create_application_screen.dart';
 import 'providers/auth_provider.dart';
 import 'providers/user_provider.dart';
 
@@ -59,6 +60,7 @@ class MyApp extends StatelessWidget {
           '/register': (context) => const RegisterScreen(),
           '/otp': (context) => const OTPScreen(),
           '/dashboard': (context) => const DashboardScreen(),
+          '/create-application': (context) => const CreateApplicationScreen(),
         },
       ),
     );

@@ -3,6 +3,9 @@ import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/user_provider.dart';
 import '../../models/application_model.dart';
+import 'application_details_screen.dart';
+import '../../screens/auth_screens/login_screen.dart';
+import 'create_application_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({Key? key}) : super(key: key);
@@ -35,6 +38,29 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Dashboard'),
+        actions: [
+          if (user != null && user.role == 'worker')
+            IconButton(
+              icon: const Icon(Icons.add),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const CreateApplicationScreen(),
+                  ),
+                );
+              },
+            ),
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: () {
+              Provider.of<AuthProvider>(context, listen: false).logout();
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(builder: (context) => const LoginScreen()),
+              );
+            },
+          ),
+        ],
       ),
       body: userProvider.isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -85,34 +111,73 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             final app = applications[index];
                             return Card(
                               margin: const EdgeInsets.only(bottom: 8),
-                              child: ListTile(
-                                title: Text('Proposal #${index + 1}'),
-                                subtitle: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(app.proposalText),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      'Price: \$${app.proposedPrice.toStringAsFixed(2)}',
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
+                              child: InkWell(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          ApplicationDetailsScreen(
+                                        application: app,
                                       ),
                                     ),
-                                    Text(
-                                      'Status: ${app.status}',
-                                      style: TextStyle(
-                                        color: app.status == 'pending'
-                                            ? Colors.orange
-                                            : app.status == 'accepted'
-                                                ? Colors.green
-                                                : Colors.red,
+                                  );
+                                },
+                                child: Padding(
+                                  padding: const EdgeInsets.all(12.0),
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              'Proposal #${index + 1}',
+                                              style: const TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              'Price: \$${app.proposedPrice.toStringAsFixed(2)}',
+                                              style: const TextStyle(
+                                                color: Colors.grey,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                       ),
-                                    ),
-                                  ],
-                                ),
-                                trailing: Text(
-                                  app.createdAt.toString().split('T')[0],
-                                  style: const TextStyle(fontSize: 12),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 12,
+                                          vertical: 6,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: app.status == 'pending'
+                                              ? Colors.orange.withOpacity(0.2)
+                                              : app.status == 'accepted'
+                                                  ? Colors.green
+                                                      .withOpacity(0.2)
+                                                  : Colors.red.withOpacity(0.2),
+                                          borderRadius:
+                                              BorderRadius.circular(20),
+                                        ),
+                                        child: Text(
+                                          app.status.toUpperCase(),
+                                          style: TextStyle(
+                                            color: app.status == 'pending'
+                                                ? Colors.orange
+                                                : app.status == 'accepted'
+                                                    ? Colors.green
+                                                    : Colors.red,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                             );

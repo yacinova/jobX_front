@@ -4,8 +4,7 @@ class User {
   final bool isVerified;
   final String role;
   final DateTime createdAt;
-  final String firstName;
-  final String lastName;
+  final String fullName;
 
   User({
     required this.id,
@@ -13,8 +12,7 @@ class User {
     required this.isVerified,
     required this.role,
     required this.createdAt,
-    required this.firstName,
-    required this.lastName,
+    required this.fullName,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -24,8 +22,7 @@ class User {
       isVerified: json['isVerified'],
       role: json['role'],
       createdAt: DateTime.parse(json['createdAt']),
-      firstName: json['firstName'] ?? '',
-      lastName: json['lastName'] ?? '',
+      fullName: json['fullName'] ?? '',
     );
   }
 }
